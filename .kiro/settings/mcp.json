@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "higgsfield": {
+      "type": "http",
+      "url": "https://mcp.higgsfield.ai/mcp",
+      "disabled": false,
+      "autoApprove": []
+    },
+    "blender": {
+      "command": "C:\\Users\\Aashish Pardeshi\\.local\\bin\\uvx.exe",
+      "args": ["--python", "3.11", "blender-mcp"],
+      "env": {
+        "UV_PYTHON_PREFERENCE": "only-managed"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}

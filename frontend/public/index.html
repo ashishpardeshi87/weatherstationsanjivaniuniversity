@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>VIYAT · A Living Sky over Sanjivani University</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body data-cond="sunny">
+  <canvas id="world"></canvas>
+
+  <div id="hud" class="hud">
+    <header class="hud-top">
+      <div class="brand">
+        <div class="brand-mark">VIYAT</div>
+        <div class="brand-sub">A living sky over Sanjivani University · Kopargaon</div>
+      </div>
+    </header>
+
+    <div class="hud-bottom">
+      <div class="hero">
+        <div class="hero-caption" id="caption">the world</div>
+        <div class="hero-temp"><span id="temp">--</span><span class="deg">°</span></div>
+        <div class="hero-cond"><span id="condEmoji">·</span><span id="condLabel">Loading</span></div>
+        <div class="hero-mascot" id="mascot"></div>
+      </div>
+      <footer class="hud-foot">
+        <span class="dot" id="statusDot"></span>
+        <span id="statusText">Connecting…</span>
+        <span class="foot-right" id="updated"></span>
+      </footer>
+    </div>
+  </div>
+
+  <aside id="deck" class="deck">
+    <div class="deck-head">
+      <div class="deck-title">Live Telemetry</div>
+      <div class="deck-time"><span id="date">--</span><span id="clock">--:--</span></div>
+    </div>
+    <div id="charts" class="charts"></div>
+    <div id="station" class="station"></div>
+  </aside>
+
+  <div id="flash" class="flash"></div>
+  <div id="heat" class="heat"></div>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+
+  <div id="splash">
+    <div class="splash-inner">
+      <div class="splash-mark">VIYAT</div>
+      <div class="splash-ring"></div>
+      <div class="splash-sub">Stepping into the sky over Kopargaon…</div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

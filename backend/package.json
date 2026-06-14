@@ -1,0 +1,19 @@
+{
+  "name": "weather-sanjivani-backend",
+  "version": "1.0.0",
+  "description": "Backend API + live-data WebSocket relay for the Sanjivani University (Kopargaon) weather display. Logs into the VIYAT WeatherCast station and streams readings to the frontend.",
+  "type": "module",
+  "main": "server/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  }
+}
