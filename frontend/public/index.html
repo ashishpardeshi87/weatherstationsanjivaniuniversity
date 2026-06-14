@@ -6,7 +6,7 @@
   <title>VIYAT · A Living Sky over Sanjivani University</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css" />
   <script src="/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -32,8 +32,8 @@
 
     <div class="hud-bottom">
       <div class="hero">
-        <div class="hero-caption" id="caption">the world</div>
-        <div class="hero-temp"><span id="temp">--</span><span class="deg">°</span></div>
+        <div class="hero-caption" id="caption">temperature</div>
+        <div class="hero-temp"><span id="heroVal">--</span><span class="hero-unit" id="heroUnit">°C</span></div>
         <div class="hero-cond"><span id="condEmoji">·</span><span id="condLabel">Loading</span></div>
         <div class="hero-mascot" id="mascot"></div>
       </div>
@@ -50,6 +50,7 @@
       <div class="deck-title">Live Telemetry</div>
       <div class="deck-time"><span id="date">--</span><span id="clock">--:--</span></div>
     </div>
+    <div id="featured" class="featured"></div>
     <div id="charts" class="charts"></div>
     <div id="station" class="station"></div>
   </aside>

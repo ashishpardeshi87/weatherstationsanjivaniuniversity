@@ -5,6 +5,7 @@ import { deriveCondition } from './condition.js';
 
 const hud = createHUD();
 const world = createWorld(document.getElementById('world'), {
+  onScene: (scene) => hud.onScene(scene),
   onError: (e) => console.warn('world error', e),
 });
 
