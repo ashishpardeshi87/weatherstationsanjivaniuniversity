@@ -11,22 +11,27 @@ const world = createWorld(document.getElementById('world'), {
 
 let lastKey = null;
 
-createDataClient((snap) => {
-  if (!snap || !snap.reading) {
-    hud.setStatus(false, snap?.error ? 'Source error' : 'Waiting for station…');
-    return;
-  }
-  const cond = deriveCondition(snap.reading);
-  if (cond.key !== lastKey) {
-    document.body.dataset.cond = cond.key;
-    document.body.classList.toggle('is-night', !cond.isDay);
-    lastKey = cond.key;
-  }
-  world.applyCondition(cond);
-  hud.update(cond, snap);
+if (new URLSearchParams(location.search).has('demo')) {
+  // LOCAL TEST: cycle every weather condition every 10s (?demo in the URL)
+  import('./demo.js').then((m) => m.runDemo({ world, hud }));
+} else {
+  createDataClient((snap) => {
+    if (!snap || !snap.reading) {
+      hud.setStatus(false, snap?.error ? 'Source error' : 'Waiting for station…');
+      return;
+    }
+    const cond = deriveCondition(snap.reading);
+    if (cond.key !== lastKey) {
+      document.body.dataset.cond = cond.key;
+      document.body.classList.toggle('is-night', !cond.isDay);
+      lastKey = cond.key;
+    }
+    world.applyCondition(cond);
+    hud.update(cond, snap);
 
-  const age = Math.round((snap.serverTime - snap.lastUpdated) / 1000);
-  hud.setStatus(true, snap.lastUpdated && age < 120 ? 'Live' : `Updated ${age}s ago`);
-});
+    const age = Math.round((snap.serverTime - snap.lastUpdated) / 1000);
+    hud.setStatus(true, snap.lastUpdated && age < 120 ? 'Live' : `Updated ${age}s ago`);
+  });
+}
 
 requestAnimationFrame(() => setTimeout(() => document.getElementById('splash')?.classList.add('hide'), 900));

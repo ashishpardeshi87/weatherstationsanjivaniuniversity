@@ -114,40 +114,17 @@ function buildWorld(ctx) {
     EffectComposer, RenderPass, UnrealBloomPass, OutputPass, GLTFLoader, hooks } = ctx;
   const canvas = renderer.domElement;
 
-  // ---- terrain ---------------------------------------------------------
-  const SIZE = 160, SEG = 160;
-  const geo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG); geo.rotateX(-Math.PI/2);
-  const pos = geo.attributes.position, cols = [];
-  const cValley=C('#4f7a44'), cLow=C('#74b257'), cHigh=C('#cabf86');
-  for (let i=0;i<pos.count;i++){ const x=pos.getX(i), z=pos.getZ(i), y=terrainHeight(x,z); pos.setY(i,y);
-    const t=clamp(y/3.2,0,1); const col=cValley.clone().lerp(cLow,clamp(t*2,0,1)).lerp(cHigh,clamp((t-0.5)*2,0,1));
-    cols.push(col.r,col.g,col.b); }
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(cols,3)); geo.computeVertexNormals();
-  const land = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors:true, flatShading:true, roughness:1 }));
-  land.receiveShadow = true; scene.add(land);
-
-  // ---- instanced grass (short, dense field near the frog) --------------
-  const blade = new THREE.ConeGeometry(0.035, 0.22, 5); blade.translate(0,0.11,0);
-  const GC = 7000;
-  const grass = new THREE.InstancedMesh(blade, new THREE.MeshStandardMaterial({ color:0x6bb24f, roughness:1 }), GC);
-  const dummy = new THREE.Object3D();
-  for (let i=0;i<GC;i++){ const a=Math.random()*Math.PI*2, r=1.5+Math.pow(Math.random(),0.7)*15; const x=Math.cos(a)*r, z=Math.sin(a)*r;
-    dummy.position.set(x, terrainHeight(x,z), z); dummy.rotation.set((Math.random()-0.5)*0.3, Math.random()*Math.PI, (Math.random()-0.5)*0.3);
-    const s=0.7+Math.random()*0.7; dummy.scale.set(s, 0.7+Math.random()*0.8, s);
-    dummy.updateMatrix(); grass.setMatrixAt(i,dummy.matrix);
-    grass.setColorAt(i, C('#4f9a3e').lerp(C('#8fd066'), Math.random())); }
-  grass.castShadow=false; grass.receiveShadow=true; scene.add(grass);
-
-  // ---- trees -----------------------------------------------------------
-  const trunkMat=new THREE.MeshStandardMaterial({color:0x6b4a2b,roughness:1});
-  const leafMat=new THREE.MeshStandardMaterial({color:0x3f8f46,roughness:1,flatShading:true});
-  for (let i=0;i<16;i++){
-    const a=Math.random()*Math.PI*2, r=8+Math.random()*16; const x=Math.cos(a)*r, z=Math.sin(a)*r; const gy=terrainHeight(x,z);
-    const g=new THREE.Group();
-    const tk=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.22,1.4,7), trunkMat); tk.position.y=0.7; tk.castShadow=true; g.add(tk);
-    for (let j=0;j<3;j++){ const cone=new THREE.Mesh(new THREE.ConeGeometry(1.1-j*0.25,1.3,8), leafMat); cone.position.y=1.4+j*0.7; cone.castShadow=true; g.add(cone); }
-    g.position.set(x,gy,z); const s=0.7+Math.random()*0.8; g.scale.setScalar(s); scene.add(g);
-  }
+  // ---- environment: low-poly scene designed in Blender ----------------
+  // Ground (hills + grass), trees, rocks, frog + chair — one GLB.
+  const envRoot = new THREE.Group(); scene.add(envRoot);
+  new GLTFLoader().load('/models/scene.glb', (gltf) => {
+    const m = gltf.scene;
+    m.traverse((o) => { if (o.isMesh) {
+      o.castShadow = true; o.receiveShadow = true;
+      if (o.material) { o.material.envMapIntensity = 0.5; }
+    }});
+    envRoot.add(m);
+  }, undefined, (e) => { hooks.onError && hooks.onError(e); });
 
   // ---- distant city skyline -------------------------------------------
   const cityMat = new THREE.MeshStandardMaterial({ color:0x2b313b, roughness:0.85, metalness:0.1, emissive:0xffd98a, emissiveMap:windowTexture(), emissiveIntensity:0 });
@@ -190,14 +167,7 @@ function buildWorld(ctx) {
   const birds=new THREE.Group(); scene.add(birds);
   for(let i=0;i<6;i++){const b=new THREE.Sprite(new THREE.SpriteMaterial({map:birdTex,transparent:true,opacity:0,depthWrite:false}));b.scale.set(2.4,2.4,1);b.userData={r:16+Math.random()*18,h:14+Math.random()*8,sp:0.05+Math.random()*0.05,off:Math.random()*7};birds.add(b);}
 
-  // ---- frog (anchor, framed left) -------------------------------------
-  const frogRoot=new THREE.Group(); scene.add(frogRoot);
-  new GLTFLoader().load('/models/frog_scene.glb',(gltf)=>{
-    const m=gltf.scene; m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;
-      if(o.material){ o.material.envMapIntensity=0.35; if('emissive' in o.material) o.material.emissive=new THREE.Color(0x000000); }}});
-    const box=new THREE.Box3().setFromObject(m); const c=box.getCenter(new THREE.Vector3());
-    m.position.x-=c.x; m.position.z-=c.z; m.position.y-=box.min.y; frogRoot.add(m); frogRoot.scale.setScalar(1.45);
-  },undefined,(e)=>{hooks.onError&&hooks.onError(e);});
+  // (frog + chair are part of scene.glb / envRoot above)
 
   // ---- bloom -----------------------------------------------------------
   const composer=new EffectComposer(renderer);
@@ -237,8 +207,8 @@ function buildWorld(ctx) {
   new ResizeObserver(resize).observe(canvas); addEventListener('resize',resize); resize();
 
   // ---- steady hero framing; only the data/caption rotate every 10s -----
-  const FRAME = { pos: new THREE.Vector3(1.0, 1.85, 6.4), look: new THREE.Vector3(1.7, 1.0, 0) };
-  camera.fov = 44; camera.position.copy(FRAME.pos); camera.lookAt(FRAME.look); camera.updateProjectionMatrix();
+  const FRAME = { pos: new THREE.Vector3(3.2, 2.7, 9.2), look: new THREE.Vector3(1.2, 1.0, 0) };
+  camera.fov = 46; camera.position.copy(FRAME.pos); camera.lookAt(FRAME.look); camera.updateProjectionMatrix();
   const SCENES = [
     { metric:'temperature',       caption:'temperature' },
     { metric:'humidity',          caption:'humidity' },
@@ -285,8 +255,6 @@ function buildWorld(ctx) {
       const show=i<T.cloudN; s.material.opacity=lerp(s.material.opacity,show?(stormOn?0.92:0.82):0,k);
       s.material.color.lerp((stormOn||condKey==='rain')?C('#9aa3ad'):C('#ffffff'),k);});
     birds.children.forEach(b=>{const u=b.userData,ang=t*u.sp+u.off;b.position.set(Math.cos(ang)*u.r,u.h+Math.sin(ang*2)*1.2,-12+Math.sin(ang)*u.r);b.material.opacity=lerp(b.material.opacity,T.birds,k*0.5);});
-
-    frogRoot.rotation.y=Math.sin(t*0.3)*0.12; frogRoot.position.y=Math.sin(t*1.1)*0.02;
 
     if(stormOn){stormT-=dt;if(stormT<=0){stormT=2.5+Math.random()*5;doFlash();}}
 
